@@ -1,0 +1,57 @@
+name: Unity editor tests
+
+on:
+  push:
+    branches: [main, "dev/**"]
+  pull_request:
+
+jobs:
+  check-license:
+    name: Check Unity license availability
+    runs-on: ubuntu-latest
+    outputs:
+      available: ${{ steps.license.outputs.available }}
+    steps:
+      - id: license
+        name: Detect configured Unity license
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        shell: bash
+        run: |
+          if [ -n "$UNITY_LICENSE" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "Unity license is configured; editor tests will run."
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::UNITY_LICENSE is not configured. Unity editor tests are skipped until a license is added to repository Actions secrets."
+          fi
+
+  unity-tests:
+    name: Unity EditMode + PlayMode
+    needs: check-license
+    if: needs.check-license.outputs.available == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Run Unity tests
+        id: unityTests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: Game
+          unityVersion: 6000.3.24f1
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          artifactsPath: unity-test-artifacts
+          checkName: Unity Test Results
+      - name: Upload Unity test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unity-test-artifacts
+          path: unity-test-artifacts
+          if-no-files-found: ignore

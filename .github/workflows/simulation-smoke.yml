@@ -1,0 +1,21 @@
+name: C# and simulation tests
+
+on:
+  push:
+    branches: [main, "dev/**"]
+  pull_request:
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Parse all Unity C# source with Roslyn
+        run: dotnet run --project tools/CSharpSyntaxCheck/CSharpSyntaxCheck.csproj --configuration Release -- Game
+      - name: Compile and execute deterministic game-rule smoke tests
+        run: dotnet run --project tools/SimulationSmoke/SimulationSmoke.csproj --configuration Release
+      - name: Stress Core Rush across 5,000 headless matches
+        run: dotnet run --project tools/HeadlessMatchSim/HeadlessMatchSim.csproj --configuration Release

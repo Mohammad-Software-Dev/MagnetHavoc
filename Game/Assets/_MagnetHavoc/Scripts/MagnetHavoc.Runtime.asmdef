@@ -1,0 +1,14 @@
+{
+  "name": "MagnetHavoc.Runtime",
+  "rootNamespace": "MagnetHavoc",
+  "references": [],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

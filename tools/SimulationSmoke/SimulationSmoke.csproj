@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Game/Assets/_MagnetHavoc/Scripts/Core/GameTuning.cs" Link="GameTuning.cs" />
+    <Compile Include="../../Game/Assets/_MagnetHavoc/Scripts/Core/TuningRules.cs" Link="TuningRules.cs" />
+    <Compile Include="../../Game/Assets/_MagnetHavoc/Scripts/Simulation/FluxModel.cs" Link="FluxModel.cs" />
+    <Compile Include="../../Game/Assets/_MagnetHavoc/Scripts/Simulation/MatchScoreModel.cs" Link="MatchScoreModel.cs" />
+    <Compile Include="../../Game/Assets/_MagnetHavoc/Scripts/Simulation/MatchClockModel.cs" Link="MatchClockModel.cs" />
+    <Compile Include="../../Game/Assets/_MagnetHavoc/Scripts/Simulation/MatchStatsModel.cs" Link="MatchStatsModel.cs" />
+  </ItemGroup>
+</Project>
