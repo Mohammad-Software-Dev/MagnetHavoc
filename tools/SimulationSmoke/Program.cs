@@ -41,9 +41,15 @@ static class Smoke
         CheckClose(4f, score.GetScore(0), "negative scoring is ignored");
         CheckClose(7f, score.GetScore(1), "score accumulates");
         Check(score.GetLeaderId() == 1, "highest score leads");
+        Check(score.GetUniqueLeaderId() == 1, "unique leader is reported");
+        score.AddScore(0, 3f);
+        Check(score.GetUniqueLeaderId() == -1, "top-score tie has no unique winner");
+        score.AddScore(1, 0.25f);
+        Check(score.GetUniqueLeaderId() == 1, "next scoring event resolves tie");
         score.Reset();
         CheckClose(0f, score.GetScore(0), "reset clears player zero");
         CheckClose(0f, score.GetScore(1), "reset clears player one");
+        Check(score.GetUniqueLeaderId() == -1, "equal reset scores do not create arbitrary winner");
     }
 
     private static void ClockRules()
