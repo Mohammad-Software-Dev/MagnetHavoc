@@ -1,0 +1,41 @@
+{
+  "product": {
+    "title": "Magnet Havoc",
+    "status": "pre-production",
+    "orientation": "landscape",
+    "platforms": ["ios", "android"],
+    "maxPlayersTarget": 8
+  },
+  "prototype": {
+    "initialPlayers": 4,
+    "primaryMode": "core_rush",
+    "initialArena": "skyforge_station"
+  },
+  "rules": {
+    "matchSeconds": 120,
+    "scoreToWin": 100,
+    "scorePerSecond": 2,
+    "respawnSeconds": 3,
+    "spawnProtectionSeconds": 1.5
+  },
+  "movement": {
+    "moveSpeed": 6.5,
+    "acceleration": 22.0,
+    "deceleration": 28.0,
+    "dashSpeed": 13.0,
+    "dashDuration": 0.18,
+    "dashCooldown": 2.5
+  },
+  "magnet": {
+    "fluxCapacity": 100,
+    "pushFluxCost": 25,
+    "pushCooldown": 0.75,
+    "pushRange": 3.5,
+    "pullFluxPerSecond": 18,
+    "pullRange": 6.0,
+    "fluxRegenPerSecond": 25,
+    "fluxRegenDelay": 0.6,
+    "tapHoldThresholdSeconds": 0.18
+  },
+  "notes": "All numeric values are prototype hypotheses and must be tuned through playtesting."
+}
