@@ -18,41 +18,60 @@ Roslyn parses every C# source file in the Unity project. This catches real C# sy
 
 `dotnet run --project tools/SimulationSmoke/SimulationSmoke.csproj --configuration Release`
 
-This compiles the Unity-independent production source files directly and tests Flux spending/clamping, score behavior, and tuning invariants. The same source files are used by the Unity project; there is no copied implementation.
+This compiles the Unity-independent production source files directly and tests Flux spending/clamping, score behavior, match-clock/Overload behavior, and tuning invariants. The same source files are used by the Unity project; there is no copied implementation.
 
 ## Gate 4 — Unity EditMode tests
 
 `Game/Assets/_MagnetHavoc/Tests/EditMode/SimulationTests.cs`
 
-Run in Unity Test Runner once the project is opened in the pinned editor. The project explicitly depends on the Unity Test Framework. Expand this layer for cooldowns, match transitions, target selection helpers, score multipliers, and save-data migrations.
+Run in Unity Test Runner once the project is opened in the pinned editor. The project explicitly depends on the Unity Test Framework. Current coverage includes Flux, score, match-clock and safety-tuning invariants.
 
 ## Gate 5 — Unity PlayMode tests
 
-To add after the first editor run:
-- Bootstrap creates four players, Core, arena, MatchManager, camera, and HUD.
-- Core can be acquired and dropped.
-- Knockout below kill plane triggers respawn.
-- Timer ends match and rematch resets state.
+`Game/Assets/_MagnetHavoc/Tests/PlayMode/PrototypePlayModeTests.cs`
+
+Prepared regression tests cover:
+- Bootstrap creates MatchManager, Core and four active players.
+- Core resets after falling out of the arena.
+- Restart restores a knocked-out player and match state.
+
+These tests require the real Unity engine and are intentionally not claimed as executed by the non-Unity GitHub workflows.
+
+Additional PlayMode coverage to add after the first editor run:
+- Push spends Flux and moves an eligible target.
+- Pull drains Flux while held.
+- Carrier drops Core after threshold force.
+- Timer ends match and rematch resets all transient state.
 - Bot match can run for several minutes without exceptions.
 
 ## Gate 6 — device tests
 
 Required before online work:
 - Android mid-range reference device.
-- iPhone reference device.
-- 60 FPS frame pacing under representative physics load.
+- At least one modern iPhone if available.
+- 60 FPS target under normal play.
+- Repeated Push/Pull does not create escalating allocations or uncontrolled rigidbody counts.
 - Touch regions work across common aspect ratios and safe areas.
 - Thermal/memory check over repeated matches.
 
-## Gate 7 — multiplayer simulation
+## Gate 7 — human fun test
+
+This is a product gate, not an automated test.
+
+- Four humans can understand the objective without a long explanation.
+- Push/Pull reads clearly under pressure.
+- Players blame understandable mistakes rather than controls/camera.
+- Knockouts feel funny/competitive rather than arbitrary.
+- Players voluntarily rematch for roughly 15 minutes in an ugly build.
+
+Networking should not become the priority until this gate is satisfied.
+
+## Gate 8 — multiplayer simulation
 
 When networking lands:
 - 50/100/150/250 ms latency profiles.
 - 1–5% packet loss.
-- disconnect/reconnect.
-- server rejection of impossible force, movement, score, or cooldown state.
-- 8-player soak tests.
-
-## Human fun test
-
-The prototype does not pass Stage 1 because tests are green. It passes when four humans voluntarily rematch for ~15 minutes and can explain why they won or lost. Track confusion, accidental input, dead time, knockback readability, comeback frequency, and rematch intent.
+- Reconciliation stress while dashing and being pushed.
+- Core ownership/score authority divergence checks.
+- Reconnect/disconnect cases.
+- Server validation of cooldowns, Flux, motion and force limits.
