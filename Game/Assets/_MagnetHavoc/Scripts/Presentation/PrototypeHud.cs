@@ -1,3 +1,4 @@
+using MagnetHavoc.Simulation;
 using UnityEngine;
 
 namespace MagnetHavoc
@@ -66,10 +67,19 @@ namespace MagnetHavoc
 
             if (match.State == MatchState.Ended)
             {
-                GUI.Box(new Rect(width * 0.5f - 180f, height * 0.5f - 90f, 360f, 180f), string.Empty);
+                PlayerMatchStats stats = match.GetStats(_local.PlayerId);
+                GUI.Box(new Rect(width * 0.5f - 210f, height * 0.5f - 135f, 420f, 270f), string.Empty);
                 string result = match.WinnerId == _local.PlayerId ? "VICTORY!" : $"P{match.WinnerId + 1} WINS";
-                GUI.Label(new Rect(width * 0.5f - 160f, height * 0.5f - 60f, 320f, 50f), result, _title);
-                if (GUI.Button(new Rect(width * 0.5f - 90f, height * 0.5f + 15f, 180f, 52f), "REMATCH") || Input.GetKeyDown(KeyCode.R))
+                if (match.EndedInSuddenDeath) result += "  •  SUDDEN DEATH";
+                GUI.Label(new Rect(width * 0.5f - 190f, height * 0.5f - 108f, 380f, 50f), result, _title);
+                GUI.Label(new Rect(width * 0.5f - 165f, height * 0.5f - 52f, 330f, 25f),
+                    $"KOs {stats.Knockouts}  •  Eliminated {stats.Eliminations}  •  Core {stats.PossessionSeconds:0.0}s", _small);
+                GUI.Label(new Rect(width * 0.5f - 165f, height * 0.5f - 24f, 330f, 25f),
+                    $"Push {stats.Pushes}  •  Pull {stats.PullSeconds:0.0}s  •  Dash {stats.Dashes}", _small);
+                GUI.Label(new Rect(width * 0.5f - 165f, height * 0.5f + 4f, 330f, 25f),
+                    $"Core pickups {stats.CorePickups}  •  Drops {stats.CoreDrops}", _small);
+
+                if (GUI.Button(new Rect(width * 0.5f - 90f, height * 0.5f + 62f, 180f, 52f), "REMATCH") || Input.GetKeyDown(KeyCode.R))
                     match.RestartMatch();
             }
 
