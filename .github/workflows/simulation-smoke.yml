@@ -17,3 +17,5 @@ jobs:
         run: dotnet run --project tools/CSharpSyntaxCheck/CSharpSyntaxCheck.csproj --configuration Release -- Game
       - name: Compile and execute deterministic game-rule smoke tests
         run: dotnet run --project tools/SimulationSmoke/SimulationSmoke.csproj --configuration Release
+      - name: Stress Core Rush across 5,000 headless matches
+        run: dotnet run --project tools/HeadlessMatchSim/HeadlessMatchSim.csproj --configuration Release
