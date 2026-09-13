@@ -1,6 +1,6 @@
 # Testing Strategy
 
-Magnet Havoc is physics-heavy, so testing is layered. Automated tests can protect deterministic rules, but they cannot determine whether movement and knockback feel fun.
+Magnet Havoc is physics-heavy, so testing is layered. Automated tests can protect syntax and deterministic rules, but they cannot determine whether movement and knockback feel fun.
 
 ## Gate 1 — repository validation
 
@@ -8,19 +8,25 @@ Magnet Havoc is physics-heavy, so testing is layered. Automated tests can protec
 
 Runs without Unity and checks required files, JSON validity, and basic C# structural sanity. This runs on every `main` and `dev/**` push and on pull requests.
 
-## Gate 2 — deterministic simulation smoke tests
+## Gate 2 — full C# syntax parsing
+
+`dotnet run --project tools/CSharpSyntaxCheck/CSharpSyntaxCheck.csproj --configuration Release -- Game`
+
+Roslyn parses every C# source file in the Unity project. This catches real C# syntax errors without pretending to provide Unity API/type resolution.
+
+## Gate 3 — deterministic simulation smoke tests
 
 `dotnet run --project tools/SimulationSmoke/SimulationSmoke.csproj --configuration Release`
 
 This compiles the Unity-independent production source files directly and tests Flux spending/clamping, score behavior, and tuning invariants. The same source files are used by the Unity project; there is no copied implementation.
 
-## Gate 3 — Unity EditMode tests
+## Gate 4 — Unity EditMode tests
 
 `Game/Assets/_MagnetHavoc/Tests/EditMode/SimulationTests.cs`
 
-Run in Unity Test Runner once the project is opened in the pinned editor. Expand this layer for cooldowns, match transitions, target selection helpers, score multipliers, and save-data migrations.
+Run in Unity Test Runner once the project is opened in the pinned editor. The project explicitly depends on the Unity Test Framework. Expand this layer for cooldowns, match transitions, target selection helpers, score multipliers, and save-data migrations.
 
-## Gate 4 — Unity PlayMode tests
+## Gate 5 — Unity PlayMode tests
 
 To add after the first editor run:
 - Bootstrap creates four players, Core, arena, MatchManager, camera, and HUD.
@@ -29,7 +35,7 @@ To add after the first editor run:
 - Timer ends match and rematch resets state.
 - Bot match can run for several minutes without exceptions.
 
-## Gate 5 — device tests
+## Gate 6 — device tests
 
 Required before online work:
 - Android mid-range reference device.
@@ -38,7 +44,7 @@ Required before online work:
 - Touch regions work across common aspect ratios and safe areas.
 - Thermal/memory check over repeated matches.
 
-## Gate 6 — multiplayer simulation
+## Gate 7 — multiplayer simulation
 
 When networking lands:
 - 50/100/150/250 ms latency profiles.
