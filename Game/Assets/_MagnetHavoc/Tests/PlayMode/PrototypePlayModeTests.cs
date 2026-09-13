@@ -32,6 +32,9 @@ namespace MagnetHavoc.Tests
             Assert.AreEqual(MatchState.Playing, match.State);
             Assert.IsNotNull(match.Players);
             Assert.AreEqual(4, match.Players.Length);
+            Assert.IsTrue(TuningRules.IsValid(RuntimeContext.Tuning));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(RuntimeContext.Tuning.TuningVersion));
+            Assert.IsNotNull(Object.FindAnyObjectByType<PrototypeTelemetry>(), "Prototype telemetry must auto-attach for playtest summaries.");
 
             for (int i = 0; i < match.Players.Length; i++)
             {
@@ -71,6 +74,8 @@ namespace MagnetHavoc.Tests
             Assert.IsFalse(player.IsKnockedOut);
             Assert.IsTrue(player.gameObject.activeInHierarchy);
             Assert.AreEqual(0f, match.GetScore(player.PlayerId), 0.001f);
+            Assert.AreEqual(0f, match.ElapsedSeconds, 0.1f);
+            Assert.AreEqual(0, match.GetStats(player.PlayerId).Eliminations);
         }
     }
 }
