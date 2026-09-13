@@ -28,7 +28,9 @@ namespace MagnetHavoc
             public string utc;
             public string appVersion;
             public string unityVersion;
+            public string tuningVersion;
             public int matchIndex;
+            public float durationSeconds;
             public int winnerId;
             public bool suddenDeath;
             public PlayerSummary[] players;
@@ -108,7 +110,9 @@ namespace MagnetHavoc
                 utc = DateTime.UtcNow.ToString("O"),
                 appVersion = Application.version,
                 unityVersion = Application.unityVersion,
+                tuningVersion = RuntimeContext.Tuning.TuningVersion,
                 matchIndex = _matchIndex,
+                durationSeconds = _match.ElapsedSeconds,
                 winnerId = winnerId,
                 suddenDeath = _match.EndedInSuddenDeath,
                 players = players
