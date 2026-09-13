@@ -39,12 +39,15 @@ namespace MagnetHavoc
                 _visual?.SetMagnetState(false, false);
                 return;
             }
+
+            MatchManager.Instance?.RecordPull(_owner.PlayerId, Time.fixedDeltaTime);
             ApplyField(false);
         }
 
         private void Push()
         {
             if (!_flux.TrySpend(RuntimeContext.Tuning.PushFluxCost)) return;
+            MatchManager.Instance?.RecordPush(_owner.PlayerId);
             ApplyField(true);
             _visual?.SetMagnetState(false, true);
             GameAudio.Instance?.PlayPush(transform.position);
