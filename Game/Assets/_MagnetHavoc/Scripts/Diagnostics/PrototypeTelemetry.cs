@@ -39,8 +39,22 @@ namespace MagnetHavoc
 
         public static string LogPath => Path.Combine(Application.persistentDataPath, "magnet_havoc_playtests.jsonl");
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void AutoCreate()
+        {
+            if (FindAnyObjectByType<PrototypeTelemetry>() != null) return;
+            new GameObject("PrototypeTelemetry").AddComponent<PrototypeTelemetry>();
+        }
+
+        private void Update()
+        {
+            if (_match == null && MatchManager.Instance != null)
+                Configure(MatchManager.Instance);
+        }
+
         public void Configure(MatchManager match)
         {
+            if (_match == match) return;
             Unsubscribe();
             _match = match;
             if (_match == null) return;
