@@ -38,6 +38,29 @@ namespace MagnetHavoc.Simulation
             return leader;
         }
 
+        public int GetUniqueLeaderId()
+        {
+            int leader = -1;
+            float best = float.MinValue;
+            bool tied = false;
+
+            foreach (KeyValuePair<int, float> entry in _scores)
+            {
+                if (entry.Value > best)
+                {
+                    best = entry.Value;
+                    leader = entry.Key;
+                    tied = false;
+                }
+                else if (entry.Value == best)
+                {
+                    tied = true;
+                }
+            }
+
+            return tied ? -1 : leader;
+        }
+
         public void Reset()
         {
             int[] keys = new int[_scores.Count];
