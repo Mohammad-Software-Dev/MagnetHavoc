@@ -74,6 +74,7 @@ namespace MagnetHavoc
             _body.isKinematic = true;
             _body.linearVelocity = Vector3.zero;
             _body.angularVelocity = Vector3.zero;
+            MatchManager.Instance?.RecordCorePickup(player.PlayerId);
             GameAudio.Instance?.PlayPickup(transform.position);
         }
 
@@ -90,7 +91,11 @@ namespace MagnetHavoc
 
         public void Drop(Vector3 position, Vector3 velocity)
         {
+            PlayerController previousHolder = Holder;
             Holder = null;
+            if (previousHolder != null)
+                MatchManager.Instance?.RecordCoreDrop(previousHolder.PlayerId);
+
             transform.position = position;
             transform.rotation = Quaternion.identity;
             _body.isKinematic = false;
