@@ -73,15 +73,59 @@ namespace MagnetHavoc.Tests
         }
 
         [Test]
-        public void DefaultTuningKeepsSafetyRadiiOrdered()
+        public void MatchStatsTrackAndResetPlaytestSignals()
+        {
+            MatchStatsModel stats = new MatchStatsModel();
+            stats.Register(7);
+            stats.RecordPush(7);
+            stats.RecordDash(7);
+            stats.RecordCorePickup(7);
+            stats.RecordCoreDrop(7);
+            stats.RecordKnockout(7);
+            stats.RecordElimination(7);
+            stats.AddPossession(7, 4.5f);
+            stats.AddPull(7, 2.25f);
+
+            PlayerMatchStats player = stats.Get(7);
+            Assert.AreEqual(1, player.Pushes);
+            Assert.AreEqual(1, player.Dashes);
+            Assert.AreEqual(1, player.CorePickups);
+            Assert.AreEqual(1, player.CoreDrops);
+            Assert.AreEqual(1, player.Knockouts);
+            Assert.AreEqual(1, player.Eliminations);
+            Assert.AreEqual(4.5f, player.PossessionSeconds, 0.001f);
+            Assert.AreEqual(2.25f, player.PullSeconds, 0.001f);
+
+            stats.Reset();
+            player = stats.Get(7);
+            Assert.AreEqual(0, player.Pushes);
+            Assert.AreEqual(0, player.Knockouts);
+            Assert.AreEqual(0f, player.PossessionSeconds, 0.001f);
+        }
+
+        [Test]
+        public void DefaultTuningPassesValidation()
         {
             GameTuning tuning = GameTuning.CreateDefault();
+            Assert.IsTrue(TuningRules.IsValid(tuning));
             Assert.Greater(tuning.ArenaSafeRadius, tuning.BotEdgeAvoidRadius);
             Assert.Greater(tuning.SpawnProtectionSeconds, 0f);
             Assert.Greater(tuning.MoveDeceleration, tuning.MoveAcceleration);
             Assert.Greater(tuning.CoreResetY, tuning.KnockoutY);
             Assert.Greater(tuning.DashKnockbackMultiplier, 0f);
             Assert.LessOrEqual(tuning.DashKnockbackMultiplier, 1f);
+        }
+
+        [Test]
+        public void TuningValidationRejectsBrokenCompetitiveRules()
+        {
+            GameTuning tuning = GameTuning.CreateDefault();
+            tuning.OverloadStartSeconds = tuning.MatchDurationSeconds + 1f;
+            Assert.IsFalse(TuningRules.IsValid(tuning));
+
+            tuning = GameTuning.CreateDefault();
+            tuning.DashKnockbackMultiplier = 1.5f;
+            Assert.IsFalse(TuningRules.IsValid(tuning));
         }
     }
 }
