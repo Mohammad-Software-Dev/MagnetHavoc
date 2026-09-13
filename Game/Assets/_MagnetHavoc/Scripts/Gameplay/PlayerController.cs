@@ -14,6 +14,8 @@ namespace MagnetHavoc
         private float _dashCooldownRemaining;
         private float _spawnProtectionRemaining;
         private Vector3 _dashDirection;
+        private int _lastExternalInstigatorId = -1;
+        private float _lastExternalHitTime = -999f;
         private bool _configured;
 
         public int PlayerId { get; private set; }
@@ -106,6 +108,7 @@ namespace MagnetHavoc
             _dashDirection = direction.normalized;
             _dashRemaining = RuntimeContext.Tuning.DashDuration;
             _dashCooldownRemaining = RuntimeContext.Tuning.DashCooldown;
+            MatchManager.Instance?.RecordDash(PlayerId);
             GameAudio.Instance?.PlayDash(transform.position);
         }
 
@@ -113,12 +116,24 @@ namespace MagnetHavoc
         {
             if (IsKnockedOut || IsSpawnProtected) return;
 
+            if (instigatorId >= 0 && instigatorId != PlayerId)
+            {
+                _lastExternalInstigatorId = instigatorId;
+                _lastExternalHitTime = Time.time;
+            }
+
             float resistance = IsDashing ? RuntimeContext.Tuning.DashKnockbackMultiplier : 1f;
             Vector3 applied = impulse * resistance;
             _body.AddForce(applied, ForceMode.VelocityChange);
 
             if (CoreObjective.Instance != null && CoreObjective.Instance.Holder == this)
                 CoreObjective.Instance.NotifyCarrierHit(applied.magnitude, instigatorId);
+        }
+
+        public int GetRecentInstigator(float windowSeconds)
+        {
+            if (_lastExternalInstigatorId < 0 || windowSeconds < 0f) return -1;
+            return Time.time - _lastExternalHitTime <= windowSeconds ? _lastExternalInstigatorId : -1;
         }
 
         public void MarkKnockedOut()
@@ -142,6 +157,8 @@ namespace MagnetHavoc
             _dashRemaining = 0f;
             _dashCooldownRemaining = 0f;
             _spawnProtectionRemaining = RuntimeContext.Tuning.SpawnProtectionSeconds;
+            _lastExternalInstigatorId = -1;
+            _lastExternalHitTime = -999f;
             _flux?.ResetMeter();
         }
     }
