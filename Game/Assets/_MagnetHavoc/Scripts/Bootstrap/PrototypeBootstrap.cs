@@ -7,7 +7,7 @@ namespace MagnetHavoc
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void AutoBoot()
         {
-            if (FindAnyObjectByType<PrototypeBootstrap>() != null) return;
+            if (Object.FindAnyObjectByType<PrototypeBootstrap>() != null) return;
             GameObject root = new GameObject("MagnetHavoc_Prototype");
             root.AddComponent<PrototypeBootstrap>();
         }
@@ -19,7 +19,7 @@ namespace MagnetHavoc
             Application.targetFrameRate = 60;
             QualitySettings.vSyncCount = 0;
 
-            if (FindAnyObjectByType<GameAudio>() == null) new GameObject("Audio").AddComponent<GameAudio>();
+            if (Object.FindAnyObjectByType<GameAudio>() == null) new GameObject("Audio").AddComponent<GameAudio>();
             CreateLighting();
             CreateArena();
 
@@ -137,7 +137,6 @@ namespace MagnetHavoc
             spinner.AddComponent<Rigidbody>();
             spinner.AddComponent<RotatingHazard>();
 
-            // Edge bumpers create readable cover while leaving open knockout lanes.
             for (int i = 0; i < 4; i++)
             {
                 Vector3 pos = i < 2 ? new Vector3(i == 0 ? -6.3f : 6.3f, 0.55f, 0f) : new Vector3(0f, 0.55f, i == 2 ? -6.3f : 6.3f);
@@ -151,7 +150,7 @@ namespace MagnetHavoc
 
         private static void CreateLighting()
         {
-            if (FindAnyObjectByType<Light>() != null) return;
+            if (Object.FindAnyObjectByType<Light>() != null) return;
             GameObject lightObject = new GameObject("Sun");
             Light light = lightObject.AddComponent<Light>();
             light.type = LightType.Directional;
@@ -184,6 +183,7 @@ namespace MagnetHavoc
         {
             Shader shader = Shader.Find("Standard");
             if (shader == null) shader = Shader.Find("Universal Render Pipeline/Lit");
+            if (shader == null) shader = Shader.Find("Hidden/InternalErrorShader");
             Material material = new Material(shader);
             material.color = color;
             if (material.HasProperty("_Metallic")) material.SetFloat("_Metallic", 0.55f);
