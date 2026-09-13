@@ -48,6 +48,7 @@ This repository is designed to be readable by both humans and AI implementation 
 - `27_TESTING_STRATEGY.md` — automated, Unity, device, and human test gates.
 - `28_STAGE2_FEEL_PASS.md` — first recovery/readability implementation pass.
 - `29_UNITY_PLAYTEST_CHECKLIST.md` — exact editor/device/human verification checklist for the current draft PR.
+- `30_PLAYTEST_TELEMETRY.md` — local match summaries, tuning versions, and prototype balance-data workflow.
 
 ## Product status
 
