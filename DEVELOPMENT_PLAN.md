@@ -6,41 +6,60 @@ Ship a polished mobile competitive physics game whose first five seconds are und
 
 ## Stage 0 — repository + technical baseline
 
-**Status: complete in this branch.**
+**Status: complete in the vertical-slice branch.**
 
 - Pin Unity 6.3 LTS.
 - Establish runtime architecture and tuning model.
 - Separate simulation, input, gameplay, and presentation.
-- Add repository validation and Unity edit-mode tests.
+- Add repository validation, Roslyn syntax validation, deterministic .NET smoke tests, and Unity test assemblies.
 
 ## Stage 1 — local fun prototype
 
-**Current stage.**
+**Status: source implementation complete; Unity/device verification still required.**
 
-Exit criteria:
-- One arena runs from a clean Unity project.
+Implemented in source:
+- One runtime-generated arena.
 - Human player + three bots.
-- Responsive movement and dash.
+- Responsive movement, deceleration, and dash.
 - Tap Push and hold Pull.
-- Magnetic crates and a magnetic Flux Core.
-- Player knockback and arena knockouts.
-- Core possession, scoring, timer, winner, and restart.
-- Basic animation, camera, VFX/audio feedback, and mobile touch input.
-- Stable 60 FPS target on representative mid-range mobile hardware.
+- Magnetic crates and Flux Core.
+- Player knockback, arena knockouts, safe respawn selection, and short respawn protection.
+- Core possession, scoring, timer, winner, Overload, and rematch.
+- Automatic Core recovery if the objective falls off the arena.
+- Basic character motion, ownership/protection markers, camera, HUD, audio feedback, and mobile touch input.
 
-Do not add accounts, shops, crews, or networking until human playtests say this loop is fun.
+Verification gate:
+- Open successfully in Unity 6000.3.24f1 with zero C# errors.
+- Run EditMode and PlayMode tests in Unity.
+- Verify desktop controls and at least one physical phone.
+- Record feel/tuning problems before locking balance values.
 
 ## Stage 2 — feel and balance
 
-- Tune acceleration, dash, force curves, Flux costs, pickup rules, and Core break thresholds.
-- Improve aim assistance and target selection.
-- Add clearer hit/force feedback.
-- Test alternate arena geometry and safe recovery options.
-- Record playtest observations in `docs/24_DECISIONS_AND_OPEN_QUESTIONS.md`.
+**Status: initial safety/readability pass implemented; subjective tuning remains blocked on playtest.**
 
-Gate: four humans willingly rematch for at least 15 minutes in an ugly build.
+Implemented before playtest:
+- Safer bot edge steering.
+- Safe respawn selection.
+- Spawn protection.
+- Tunable dash knockback resistance.
+- Deterministic match clock/Overload model.
+- Core recovery and data-driven carry/drop tuning.
+- Clearer HUD and world state markers.
+- Duplicate magnetic-force bug on Core carriers fixed.
+
+Playtest work still required:
+- Tune acceleration, deceleration, dash cadence, force curves, Flux costs, pickup rules, and Core break thresholds.
+- Evaluate directional aim assistance versus omnidirectional field behavior.
+- Improve hit/force feedback based on observed confusion.
+- Test alternate arena geometry and edge-recovery options only if needed.
+- Record observations in `docs/24_DECISIONS_AND_OPEN_QUESTIONS.md`.
+
+Gate: four humans willingly rematch for roughly 15 minutes in an ugly build.
 
 ## Stage 3 — online multiplayer
+
+Begin only after the local fun gate passes.
 
 - Introduce a networking adapter abstraction.
 - Server-authoritative match rules and critical physics.
