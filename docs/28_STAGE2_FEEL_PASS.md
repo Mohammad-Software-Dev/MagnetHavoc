@@ -10,9 +10,11 @@ This pass improves failure recovery and match readability without locking subjec
 - Dash provides tunable resistance to magnetic knockback while active.
 - Bots bias back toward the arena center near dangerous edges and avoid wasting dashes at the boundary.
 - Core carrier/drop offsets and launch speed are data-driven.
+- Held Core colliders no longer cause duplicate magnetic force on the carrier.
 - HUD exposes dash readiness, spawn protection, Core ownership, and clearer scoreboard ownership markers.
 - Player visuals expose spawn protection and Core ownership with simple prototype markers.
 - Match timer / Overload timing is extracted into a Unity-independent deterministic model and tested in CI.
+- Unity PlayMode regression tests are prepared for bootstrap, Core recovery, and rematch reset behavior.
 
 ## Still intentionally unresolved
 
