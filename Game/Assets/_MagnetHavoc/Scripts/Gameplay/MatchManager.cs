@@ -14,12 +14,14 @@ namespace MagnetHavoc
         private MatchClockModel _clock;
         private Vector3[] _spawns;
         private CoreObjective _core;
+        private bool _suddenDeath;
 
         public MatchState State { get; private set; } = MatchState.Warmup;
         public PlayerController[] Players { get; private set; }
         public float RemainingSeconds => _clock != null ? _clock.RemainingSeconds : 0f;
         public int WinnerId { get; private set; } = -1;
-        public bool IsOverload => State == MatchState.Playing && _clock != null && _clock.IsOverload;
+        public bool IsSuddenDeath => State == MatchState.Playing && _suddenDeath;
+        public bool IsOverload => State == MatchState.Playing && (_suddenDeath || (_clock != null && _clock.IsOverload));
 
         private void Awake() => Instance = this;
 
@@ -36,7 +38,8 @@ namespace MagnetHavoc
         {
             if (State != MatchState.Playing || _core == null || _clock == null) return;
 
-            _clock.Advance(Time.deltaTime);
+            if (!_suddenDeath) _clock.Advance(Time.deltaTime);
+
             if (_core.Holder != null)
             {
                 float multiplier = IsOverload ? RuntimeContext.Tuning.OverloadScoreMultiplier : 1f;
@@ -46,9 +49,26 @@ namespace MagnetHavoc
                     Finish(_core.Holder.PlayerId);
                     return;
                 }
+
+                if (_suddenDeath)
+                {
+                    int suddenDeathLeader = _scores.GetUniqueLeaderId();
+                    if (suddenDeathLeader >= 0)
+                    {
+                        Finish(suddenDeathLeader);
+                        return;
+                    }
+                }
             }
 
-            if (_clock.IsExpired) Finish(_scores.GetLeaderId());
+            if (!_suddenDeath && _clock.IsExpired)
+            {
+                int leader = _scores.GetUniqueLeaderId();
+                if (leader >= 0)
+                    Finish(leader);
+                else
+                    _suddenDeath = true;
+            }
         }
 
         public float GetScore(int playerId) => _scores.GetScore(playerId);
@@ -129,6 +149,7 @@ namespace MagnetHavoc
         {
             State = MatchState.Ended;
             WinnerId = winnerId;
+            _suddenDeath = false;
             GameAudio.Instance?.PlayWin(Vector3.zero);
         }
 
@@ -137,6 +158,7 @@ namespace MagnetHavoc
             StopAllCoroutines();
             _scores.Reset();
             _clock = new MatchClockModel(RuntimeContext.Tuning.MatchDurationSeconds, RuntimeContext.Tuning.OverloadStartSeconds);
+            _suddenDeath = false;
             WinnerId = -1;
             State = MatchState.Playing;
 
