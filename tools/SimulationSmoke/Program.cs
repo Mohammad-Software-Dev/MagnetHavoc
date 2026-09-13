@@ -9,6 +9,7 @@ static class Smoke
     {
         FluxRules();
         ScoreRules();
+        ClockRules();
         TuningSanity();
         Console.WriteLine($"Simulation smoke tests passed ({_assertions} assertions).\n");
         return 0;
@@ -45,16 +46,38 @@ static class Smoke
         CheckClose(0f, score.GetScore(1), "reset clears player one");
     }
 
+    private static void ClockRules()
+    {
+        MatchClockModel clock = new MatchClockModel(120f, 30f);
+        CheckClose(120f, clock.RemainingSeconds, "clock starts at duration");
+        Check(!clock.IsOverload, "match does not start in overload");
+        clock.Advance(89f);
+        CheckClose(31f, clock.RemainingSeconds, "clock advances deterministically");
+        Check(!clock.IsOverload, "31 seconds is outside overload");
+        clock.Advance(1f);
+        Check(clock.IsOverload, "30 seconds enters overload");
+        clock.Advance(1000f);
+        Check(clock.IsExpired, "clock expires at zero");
+        Check(!clock.IsOverload, "expired clock is not overload");
+        CheckClose(0f, clock.RemainingSeconds, "clock clamps at zero");
+        clock.Reset();
+        CheckClose(120f, clock.RemainingSeconds, "clock reset restores duration");
+    }
+
     private static void TuningSanity()
     {
         GameTuning t = GameTuning.CreateDefault();
         Check(t.MoveSpeed > 0f, "move speed positive");
+        Check(t.MoveDeceleration > t.MoveAcceleration, "release deceleration exceeds acceleration");
         Check(t.DashCooldown > t.DashDuration, "dash cooldown exceeds active dash duration");
+        Check(t.DashKnockbackMultiplier > 0f && t.DashKnockbackMultiplier <= 1f, "dash resistance multiplier is valid");
         Check(t.MagnetRange > t.CorePickupRadius, "magnet range exceeds pickup radius");
         Check(t.FluxMax > t.PushFluxCost, "a fresh player can Push");
         Check(t.MatchDurationSeconds > t.OverloadStartSeconds, "overload begins before match ends");
         Check(t.ScoreTarget > 0f && t.ScorePerSecond > 0f, "score rules positive");
-        Check(t.RespawnDelay > 0f, "respawn delay positive");
+        Check(t.RespawnDelay > 0f && t.SpawnProtectionSeconds > 0f, "respawn rules positive");
+        Check(t.CoreResetY > t.KnockoutY, "Core recovers before falling as far as a knocked-out player");
+        Check(t.ArenaSafeRadius > t.BotEdgeAvoidRadius, "bots react before reaching the safety limit");
     }
 
     private static void Check(bool value, string message)
