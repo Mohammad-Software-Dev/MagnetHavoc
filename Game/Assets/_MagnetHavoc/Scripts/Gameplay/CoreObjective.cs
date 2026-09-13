@@ -12,6 +12,8 @@ namespace MagnetHavoc
         private float _pickupLockedUntil;
 
         public PlayerController Holder { get; private set; }
+        public bool IsLoose => Holder == null;
+        public float PickupLockRemaining => Mathf.Max(0f, _pickupLockedUntil - Time.time);
 
         private void Awake()
         {
@@ -29,13 +31,23 @@ namespace MagnetHavoc
         {
             if (Holder != null)
             {
-                Vector3 target = Holder.transform.position + Vector3.up * 1.35f + Holder.transform.forward * 0.65f;
-                transform.position = Vector3.Lerp(transform.position, target, 0.65f);
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.identity, 360f * Time.fixedDeltaTime);
+                Vector3 target = Holder.transform.position
+                    + Vector3.up * RuntimeContext.Tuning.CoreCarryHeight
+                    + Holder.transform.forward * RuntimeContext.Tuning.CoreCarryForward;
+                _body.MovePosition(Vector3.Lerp(_body.position, target, 0.65f));
+                _body.MoveRotation(Quaternion.RotateTowards(_body.rotation, Quaternion.identity, 360f * Time.fixedDeltaTime));
                 return;
             }
 
-            if (Time.time < _pickupLockedUntil || MatchManager.Instance == null) return;
+            if (transform.position.y < RuntimeContext.Tuning.CoreResetY)
+            {
+                ResetToSpawn();
+                return;
+            }
+
+            if (Time.time < _pickupLockedUntil || MatchManager.Instance == null || MatchManager.Instance.State != MatchState.Playing)
+                return;
+
             PlayerController[] players = MatchManager.Instance.Players;
             float radiusSq = RuntimeContext.Tuning.CorePickupRadius * RuntimeContext.Tuning.CorePickupRadius;
             PlayerController closest = null;
@@ -61,22 +73,29 @@ namespace MagnetHavoc
             Holder = player;
             _body.isKinematic = true;
             _body.linearVelocity = Vector3.zero;
+            _body.angularVelocity = Vector3.zero;
             GameAudio.Instance?.PlayPickup(transform.position);
         }
 
         public void NotifyCarrierHit(float impulseMagnitude, int instigatorId)
         {
             if (Holder == null || impulseMagnitude < RuntimeContext.Tuning.CoreCarrierBreakImpulse) return;
-            Vector3 direction = Holder.Body.linearVelocity.sqrMagnitude > 0.1f ? Holder.Body.linearVelocity.normalized : Holder.transform.forward;
-            Drop(Holder.transform.position + Vector3.up * 1.1f, direction * 3f);
+
+            PlayerController carrier = Holder;
+            Vector3 velocity = carrier.Body.linearVelocity;
+            Vector3 direction = velocity.sqrMagnitude > 0.1f ? velocity.normalized : carrier.transform.forward;
+            Vector3 dropVelocity = velocity + direction * RuntimeContext.Tuning.CoreDropSpeed;
+            Drop(carrier.transform.position + Vector3.up * 1.1f, dropVelocity);
         }
 
         public void Drop(Vector3 position, Vector3 velocity)
         {
             Holder = null;
             transform.position = position;
+            transform.rotation = Quaternion.identity;
             _body.isKinematic = false;
             _body.linearVelocity = velocity;
+            _body.angularVelocity = Vector3.zero;
             _pickupLockedUntil = Time.time + RuntimeContext.Tuning.CorePickupLockout;
         }
 
@@ -84,6 +103,7 @@ namespace MagnetHavoc
         {
             Holder = null;
             transform.position = _spawn;
+            transform.rotation = Quaternion.identity;
             _body.isKinematic = false;
             _body.linearVelocity = Vector3.zero;
             _body.angularVelocity = Vector3.zero;
