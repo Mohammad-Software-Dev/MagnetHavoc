@@ -10,6 +10,7 @@ static class Smoke
         FluxRules();
         ScoreRules();
         ClockRules();
+        StatsRules();
         TuningSanity();
         Console.WriteLine($"Simulation smoke tests passed ({_assertions} assertions).\n");
         return 0;
@@ -70,20 +71,50 @@ static class Smoke
         CheckClose(120f, clock.RemainingSeconds, "clock reset restores duration");
     }
 
+    private static void StatsRules()
+    {
+        MatchStatsModel stats = new MatchStatsModel();
+        stats.Register(0);
+        stats.RecordPush(0);
+        stats.RecordDash(0);
+        stats.RecordCorePickup(0);
+        stats.RecordCoreDrop(0);
+        stats.RecordKnockout(0);
+        stats.RecordElimination(0);
+        stats.AddPossession(0, 3.5f);
+        stats.AddPull(0, 1.25f);
+        stats.AddPossession(0, -99f);
+
+        PlayerMatchStats player = stats.Get(0);
+        Check(player.Pushes == 1, "push count tracked");
+        Check(player.Dashes == 1, "dash count tracked");
+        Check(player.CorePickups == 1 && player.CoreDrops == 1, "Core transitions tracked");
+        Check(player.Knockouts == 1 && player.Eliminations == 1, "combat results tracked");
+        CheckClose(3.5f, player.PossessionSeconds, "possession time tracks only positive deltas");
+        CheckClose(1.25f, player.PullSeconds, "Pull time accumulates");
+
+        stats.Reset();
+        PlayerMatchStats reset = stats.Get(0);
+        Check(reset.Pushes == 0 && reset.Dashes == 0 && reset.Knockouts == 0, "stat reset clears counters");
+        CheckClose(0f, reset.PossessionSeconds, "stat reset clears timers");
+    }
+
     private static void TuningSanity()
     {
         GameTuning t = GameTuning.CreateDefault();
-        Check(t.MoveSpeed > 0f, "move speed positive");
+        Check(TuningRules.IsValid(t), "default tuning passes production validation");
         Check(t.MoveDeceleration > t.MoveAcceleration, "release deceleration exceeds acceleration");
         Check(t.DashCooldown > t.DashDuration, "dash cooldown exceeds active dash duration");
-        Check(t.DashKnockbackMultiplier > 0f && t.DashKnockbackMultiplier <= 1f, "dash resistance multiplier is valid");
-        Check(t.MagnetRange > t.CorePickupRadius, "magnet range exceeds pickup radius");
-        Check(t.FluxMax > t.PushFluxCost, "a fresh player can Push");
-        Check(t.MatchDurationSeconds > t.OverloadStartSeconds, "overload begins before match ends");
-        Check(t.ScoreTarget > 0f && t.ScorePerSecond > 0f, "score rules positive");
-        Check(t.RespawnDelay > 0f && t.SpawnProtectionSeconds > 0f, "respawn rules positive");
-        Check(t.CoreResetY > t.KnockoutY, "Core recovers before falling as far as a knocked-out player");
-        Check(t.ArenaSafeRadius > t.BotEdgeAvoidRadius, "bots react before reaching the safety limit");
+        Check(t.KnockoutCreditWindowSeconds >= 0f, "knockout attribution window valid");
+
+        GameTuning invalid = GameTuning.CreateDefault();
+        invalid.MatchDurationSeconds = 10f;
+        invalid.OverloadStartSeconds = 15f;
+        Check(!TuningRules.IsValid(invalid), "invalid overload timing is rejected");
+
+        invalid = GameTuning.CreateDefault();
+        invalid.DashKnockbackMultiplier = 2f;
+        Check(!TuningRules.IsValid(invalid), "invalid dash resistance is rejected");
     }
 
     private static void Check(bool value, string message)
