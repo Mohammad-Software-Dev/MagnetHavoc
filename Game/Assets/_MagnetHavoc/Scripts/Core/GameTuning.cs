@@ -5,6 +5,8 @@ namespace MagnetHavoc
     [Serializable]
     public sealed class GameTuning
     {
+        public string TuningVersion = "prototype-2026-09-13-a";
+
         public float MoveSpeed = 7.5f;
         public float MoveAcceleration = 34f;
         public float MoveDeceleration = 46f;
