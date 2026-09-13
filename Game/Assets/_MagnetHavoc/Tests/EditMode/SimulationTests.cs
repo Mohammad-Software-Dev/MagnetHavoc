@@ -32,9 +32,26 @@ namespace MagnetHavoc.Tests
             scores.AddScore(0, 10f);
             scores.AddScore(1, 12f);
             Assert.AreEqual(1, scores.GetLeaderId());
+            Assert.AreEqual(1, scores.GetUniqueLeaderId());
             scores.Reset();
             Assert.AreEqual(0f, scores.GetScore(0), 0.001f);
             Assert.AreEqual(0f, scores.GetScore(1), 0.001f);
+            Assert.AreEqual(-1, scores.GetUniqueLeaderId());
+        }
+
+        [Test]
+        public void UniqueLeaderRejectsTopScoreTie()
+        {
+            MatchScoreModel scores = new MatchScoreModel();
+            scores.Register(0);
+            scores.Register(1);
+            scores.Register(2);
+            scores.AddScore(0, 10f);
+            scores.AddScore(1, 10f);
+            scores.AddScore(2, 3f);
+            Assert.AreEqual(-1, scores.GetUniqueLeaderId());
+            scores.AddScore(1, 0.5f);
+            Assert.AreEqual(1, scores.GetUniqueLeaderId());
         }
 
         [Test]
