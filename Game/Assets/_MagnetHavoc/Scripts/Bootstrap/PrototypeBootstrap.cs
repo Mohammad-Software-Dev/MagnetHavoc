@@ -14,7 +14,7 @@ namespace MagnetHavoc
 
         private void Start()
         {
-            RuntimeContext.Tuning = GameTuning.CreateDefault();
+            RuntimeContext.Tuning = TuningProvider.Load();
             Physics.gravity = new Vector3(0f, -18f, 0f);
             Application.targetFrameRate = 60;
             QualitySettings.vSyncCount = 0;
