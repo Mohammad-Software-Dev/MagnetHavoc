@@ -44,10 +44,14 @@ This repository is designed to be readable by both humans and AI implementation 
 - `22_MARKETING_POSITIONING.md` — audience, hooks, store presentation, creative angles.
 - `23_LORE_WORLD.md` — light worldbuilding and terminology.
 - `24_DECISIONS_AND_OPEN_QUESTIONS.md` — explicit decisions and items intentionally left flexible.
+- `26_IMPLEMENTATION_STATUS.md` — what currently exists in source.
+- `27_TESTING_STRATEGY.md` — automated, Unity, device, and human test gates.
+- `28_STAGE2_FEEL_PASS.md` — first recovery/readability implementation pass.
+- `29_UNITY_PLAYTEST_CHECKLIST.md` — exact editor/device/human verification checklist for the current draft PR.
 
 ## Product status
 
-**Pre-production / concept definition.** Nothing in this repository should be treated as evidence that the game has been play-tested. Numbers are starting hypotheses and must be tuned through prototypes and telemetry.
+**Pre-alpha / local vertical slice.** The current implementation lives on the `dev/vertical-slice` branch and remains unmerged until Unity/editor and device playtest gates pass. Placeholder numeric values remain hypotheses until tested.
 
 ## Golden rule for implementation
 
