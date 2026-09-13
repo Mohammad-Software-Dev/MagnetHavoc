@@ -70,23 +70,17 @@ namespace MagnetHavoc
                 CoreObjective core = body.GetComponent<CoreObjective>();
                 PlayerController player = body.GetComponent<PlayerController>();
 
-                if (core != null && core.Holder != null)
-                {
-                    if (core.Holder == _owner) continue;
-                    Vector3 carrierDirection = push
-                        ? (core.Holder.transform.position - transform.position).normalized
-                        : (transform.position - core.Holder.transform.position).normalized;
-                    float carrierStrength = (push ? RuntimeContext.Tuning.PushImpulse : RuntimeContext.Tuning.PullAcceleration * Time.fixedDeltaTime)
-                        * RuntimeContext.Tuning.PlayerForceMultiplier * RuntimeContext.Tuning.CoreForceMultiplier * falloff;
-                    core.Holder.ApplyExternalImpulse(WithLift(carrierDirection, push) * carrierStrength, _owner.PlayerId);
-                    continue;
-                }
+                // A held Core has its own collider/Rigidbody, but force belongs on the carrier.
+                // Skip the Core body here; the carrier's player Rigidbody is processed once below.
+                if (core != null && core.Holder != null) continue;
 
                 Vector3 direction = push ? offset.normalized : -offset.normalized;
                 if (player != null)
                 {
+                    bool carryingCore = CoreObjective.Instance != null && CoreObjective.Instance.Holder == player;
+                    float carrierMultiplier = carryingCore ? RuntimeContext.Tuning.CoreForceMultiplier : 1f;
                     float strength = (push ? RuntimeContext.Tuning.PushImpulse : RuntimeContext.Tuning.PullAcceleration * Time.fixedDeltaTime)
-                        * RuntimeContext.Tuning.PlayerForceMultiplier * falloff;
+                        * RuntimeContext.Tuning.PlayerForceMultiplier * carrierMultiplier * falloff;
                     player.ApplyExternalImpulse(WithLift(direction, push) * strength, _owner.PlayerId);
                 }
                 else
