@@ -44,6 +44,7 @@ namespace MagnetHavoc
         public float KnockoutY = -4.5f;
         public float RespawnDelay = 1.35f;
         public float SpawnProtectionSeconds = 0.85f;
+        public float KnockoutCreditWindowSeconds = 4f;
 
         public float ArenaSafeRadius = 7.15f;
         public float BotEdgeAvoidRadius = 6.65f;
