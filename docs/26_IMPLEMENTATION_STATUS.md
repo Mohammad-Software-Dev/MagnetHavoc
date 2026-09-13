@@ -18,6 +18,7 @@ Implemented:
 - Core pickup/drop, score accumulation, Overload scoring, match timer, winner, rematch.
 - Automatic Flux Core recovery if the objective falls out of the arena.
 - Data-driven Core carry offsets/drop behavior.
+- Duplicate magnetic-force application on Core carriers removed.
 - Primitive arena, rotating hazard, cover, and throwable crates.
 - Bots that contest the objective and bias toward arena safety near edges.
 - Procedural robot-like visual parts and simple movement/magnet animation.
@@ -26,6 +27,7 @@ Implemented:
 - Desktop controls and mobile touch input.
 - Procedurally generated placeholder audio feedback.
 - Pure scoring/Flux/match-clock simulation models plus Unity EditMode tests.
+- Prepared Unity PlayMode tests for bootstrap, Core recovery, and rematch reset behavior.
 - Repository validation, Roslyn syntax parsing, and deterministic .NET smoke tests in CI.
 
 Not yet implemented:
