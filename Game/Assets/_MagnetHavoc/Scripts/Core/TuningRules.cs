@@ -5,7 +5,8 @@ namespace MagnetHavoc
         public static bool IsValid(GameTuning t)
         {
             if (t == null) return false;
-            return t.MoveSpeed > 0f
+            return !string.IsNullOrWhiteSpace(t.TuningVersion)
+                && t.MoveSpeed > 0f
                 && t.MoveAcceleration > 0f
                 && t.MoveDeceleration > 0f
                 && t.RotationSpeedDegrees > 0f
