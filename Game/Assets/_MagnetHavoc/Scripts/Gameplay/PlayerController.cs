@@ -12,6 +12,7 @@ namespace MagnetHavoc
         private PlayerCommand _command;
         private float _dashRemaining;
         private float _dashCooldownRemaining;
+        private float _spawnProtectionRemaining;
         private Vector3 _dashDirection;
         private bool _configured;
 
@@ -22,6 +23,10 @@ namespace MagnetHavoc
         public FluxMeter Flux => _flux;
         public Rigidbody Body => _body;
         public PlayerCommand CurrentCommand => _command;
+        public float DashCooldownRemaining => Mathf.Max(0f, _dashCooldownRemaining);
+        public float SpawnProtectionRemaining => Mathf.Max(0f, _spawnProtectionRemaining);
+        public bool IsDashing => _dashRemaining > 0f;
+        public bool IsSpawnProtected => _spawnProtectionRemaining > 0f;
 
         public void Configure(int playerId, bool isLocal, Vector3 spawnPoint, IPlayerInputSource input)
         {
@@ -37,14 +42,17 @@ namespace MagnetHavoc
 
         private void Update()
         {
+            if (_dashCooldownRemaining > 0f) _dashCooldownRemaining -= Time.deltaTime;
+            if (_spawnProtectionRemaining > 0f) _spawnProtectionRemaining -= Time.deltaTime;
+
             if (!_configured || IsKnockedOut || MatchManager.Instance == null || MatchManager.Instance.State != MatchState.Playing)
             {
                 _command = default;
+                _magnet?.ProcessCommand(default);
                 return;
             }
 
             _command = _input != null ? _input.ReadCommand() : default;
-            if (_dashCooldownRemaining > 0f) _dashCooldownRemaining -= Time.deltaTime;
             if (_command.DashPressed) TryStartDash();
             _magnet?.ProcessCommand(_command);
         }
@@ -76,7 +84,10 @@ namespace MagnetHavoc
             else
             {
                 Vector3 target = desiredDirection * RuntimeContext.Tuning.MoveSpeed * carrierMultiplier;
-                Vector3 next = Vector3.MoveTowards(planar, target, RuntimeContext.Tuning.MoveAcceleration * Time.fixedDeltaTime);
+                float acceleration = desiredDirection.sqrMagnitude > 0.001f
+                    ? RuntimeContext.Tuning.MoveAcceleration
+                    : RuntimeContext.Tuning.MoveDeceleration;
+                Vector3 next = Vector3.MoveTowards(planar, target, acceleration * Time.fixedDeltaTime);
                 _body.linearVelocity = new Vector3(next.x, _body.linearVelocity.y, next.z);
             }
 
@@ -100,10 +111,14 @@ namespace MagnetHavoc
 
         public void ApplyExternalImpulse(Vector3 impulse, int instigatorId)
         {
-            if (IsKnockedOut) return;
-            _body.AddForce(impulse, ForceMode.VelocityChange);
+            if (IsKnockedOut || IsSpawnProtected) return;
+
+            float resistance = IsDashing ? RuntimeContext.Tuning.DashKnockbackMultiplier : 1f;
+            Vector3 applied = impulse * resistance;
+            _body.AddForce(applied, ForceMode.VelocityChange);
+
             if (CoreObjective.Instance != null && CoreObjective.Instance.Holder == this)
-                CoreObjective.Instance.NotifyCarrierHit(impulse.magnitude, instigatorId);
+                CoreObjective.Instance.NotifyCarrierHit(applied.magnitude, instigatorId);
         }
 
         public void MarkKnockedOut()
@@ -126,6 +141,7 @@ namespace MagnetHavoc
             _body.angularVelocity = Vector3.zero;
             _dashRemaining = 0f;
             _dashCooldownRemaining = 0f;
+            _spawnProtectionRemaining = RuntimeContext.Tuning.SpawnProtectionSeconds;
             _flux?.ResetMeter();
         }
     }
