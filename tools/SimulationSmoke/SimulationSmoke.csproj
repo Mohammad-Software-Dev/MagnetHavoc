@@ -8,8 +8,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../Game/Assets/_MagnetHavoc/Scripts/Core/GameTuning.cs" Link="GameTuning.cs" />
+    <Compile Include="../../Game/Assets/_MagnetHavoc/Scripts/Core/TuningRules.cs" Link="TuningRules.cs" />
     <Compile Include="../../Game/Assets/_MagnetHavoc/Scripts/Simulation/FluxModel.cs" Link="FluxModel.cs" />
     <Compile Include="../../Game/Assets/_MagnetHavoc/Scripts/Simulation/MatchScoreModel.cs" Link="MatchScoreModel.cs" />
     <Compile Include="../../Game/Assets/_MagnetHavoc/Scripts/Simulation/MatchClockModel.cs" Link="MatchClockModel.cs" />
+    <Compile Include="../../Game/Assets/_MagnetHavoc/Scripts/Simulation/MatchStatsModel.cs" Link="MatchStatsModel.cs" />
   </ItemGroup>
 </Project>
