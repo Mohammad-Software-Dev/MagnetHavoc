@@ -1,4 +1,5 @@
 {
+  "TuningVersion": "prototype-2026-09-13-a",
   "MoveSpeed": 7.5,
   "MoveAcceleration": 34.0,
   "MoveDeceleration": 46.0,
