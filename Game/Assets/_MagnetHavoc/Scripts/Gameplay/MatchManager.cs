@@ -11,6 +11,7 @@ namespace MagnetHavoc
         public static MatchManager Instance { get; private set; }
 
         private readonly MatchScoreModel _scores = new MatchScoreModel();
+        private readonly MatchStatsModel _stats = new MatchStatsModel();
         private MatchClockModel _clock;
         private Vector3[] _spawns;
         private CoreObjective _core;
@@ -30,7 +31,11 @@ namespace MagnetHavoc
             Players = players;
             _spawns = spawns;
             _core = core;
-            for (int i = 0; i < players.Length; i++) _scores.Register(players[i].PlayerId);
+            for (int i = 0; i < players.Length; i++)
+            {
+                _scores.Register(players[i].PlayerId);
+                _stats.Register(players[i].PlayerId);
+            }
             RestartMatch();
         }
 
@@ -42,11 +47,14 @@ namespace MagnetHavoc
 
             if (_core.Holder != null)
             {
+                int holderId = _core.Holder.PlayerId;
+                _stats.AddPossession(holderId, Time.deltaTime);
+
                 float multiplier = IsOverload ? RuntimeContext.Tuning.OverloadScoreMultiplier : 1f;
-                float score = _scores.AddScore(_core.Holder.PlayerId, RuntimeContext.Tuning.ScorePerSecond * multiplier * Time.deltaTime);
+                float score = _scores.AddScore(holderId, RuntimeContext.Tuning.ScorePerSecond * multiplier * Time.deltaTime);
                 if (score >= RuntimeContext.Tuning.ScoreTarget)
                 {
-                    Finish(_core.Holder.PlayerId);
+                    Finish(holderId);
                     return;
                 }
 
@@ -72,6 +80,12 @@ namespace MagnetHavoc
         }
 
         public float GetScore(int playerId) => _scores.GetScore(playerId);
+        public PlayerMatchStats GetStats(int playerId) => _stats.Get(playerId);
+        public void RecordPush(int playerId) => _stats.RecordPush(playerId);
+        public void RecordDash(int playerId) => _stats.RecordDash(playerId);
+        public void RecordPull(int playerId, float seconds) => _stats.AddPull(playerId, seconds);
+        public void RecordCorePickup(int playerId) => _stats.RecordCorePickup(playerId);
+        public void RecordCoreDrop(int playerId) => _stats.RecordCoreDrop(playerId);
 
         public PlayerController GetNearestOpponent(PlayerController owner)
         {
@@ -95,6 +109,12 @@ namespace MagnetHavoc
         public void OnPlayerKnockedOut(PlayerController player)
         {
             if (player == null || player.IsKnockedOut) return;
+
+            int creditedInstigator = player.GetRecentInstigator(RuntimeContext.Tuning.KnockoutCreditWindowSeconds);
+            _stats.RecordElimination(player.PlayerId);
+            if (creditedInstigator >= 0 && creditedInstigator != player.PlayerId)
+                _stats.RecordKnockout(creditedInstigator);
+
             Vector3 knockoutPosition = player.transform.position;
             player.MarkKnockedOut();
             GameAudio.Instance?.PlayKnockout(knockoutPosition);
@@ -157,6 +177,7 @@ namespace MagnetHavoc
         {
             StopAllCoroutines();
             _scores.Reset();
+            _stats.Reset();
             _clock = new MatchClockModel(RuntimeContext.Tuning.MatchDurationSeconds, RuntimeContext.Tuning.OverloadStartSeconds);
             _suddenDeath = false;
             WinnerId = -1;
