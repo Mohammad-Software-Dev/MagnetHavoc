@@ -17,10 +17,12 @@ namespace MagnetHavoc
         private Vector3[] _spawns;
         private CoreObjective _core;
         private bool _suddenDeath;
+        private float _elapsedSeconds;
 
         public MatchState State { get; private set; } = MatchState.Warmup;
         public PlayerController[] Players { get; private set; }
         public float RemainingSeconds => _clock != null ? _clock.RemainingSeconds : 0f;
+        public float ElapsedSeconds => _elapsedSeconds;
         public int WinnerId { get; private set; } = -1;
         public bool IsSuddenDeath => State == MatchState.Playing && _suddenDeath;
         public bool IsOverload => State == MatchState.Playing && (_suddenDeath || (_clock != null && _clock.IsOverload));
@@ -48,6 +50,7 @@ namespace MagnetHavoc
         {
             if (State != MatchState.Playing || _core == null || _clock == null) return;
 
+            _elapsedSeconds += Time.deltaTime;
             if (!_suddenDeath) _clock.Advance(Time.deltaTime);
 
             if (_core.Holder != null)
@@ -186,6 +189,7 @@ namespace MagnetHavoc
             _scores.Reset();
             _stats.Reset();
             _clock = new MatchClockModel(RuntimeContext.Tuning.MatchDurationSeconds, RuntimeContext.Tuning.OverloadStartSeconds);
+            _elapsedSeconds = 0f;
             _suddenDeath = false;
             EndedInSuddenDeath = false;
             WinnerId = -1;
