@@ -42,7 +42,7 @@ namespace MagnetHavoc
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void AutoCreate()
         {
-            if (FindAnyObjectByType<PrototypeTelemetry>() != null) return;
+            if (Object.FindAnyObjectByType<PrototypeTelemetry>() != null) return;
             new GameObject("PrototypeTelemetry").AddComponent<PrototypeTelemetry>();
         }
 
