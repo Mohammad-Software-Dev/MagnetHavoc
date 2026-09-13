@@ -7,10 +7,12 @@ namespace MagnetHavoc
     {
         public float MoveSpeed = 7.5f;
         public float MoveAcceleration = 34f;
+        public float MoveDeceleration = 46f;
         public float RotationSpeedDegrees = 720f;
         public float DashSpeed = 15f;
         public float DashDuration = 0.18f;
         public float DashCooldown = 2.4f;
+        public float DashKnockbackMultiplier = 0.55f;
 
         public float MagnetRange = 7.25f;
         public float PushImpulse = 9.5f;
@@ -34,9 +36,17 @@ namespace MagnetHavoc
         public float CorePickupLockout = 0.4f;
         public float CoreCarrierBreakImpulse = 6.8f;
         public float CoreCarrierMoveMultiplier = 0.92f;
+        public float CoreCarryHeight = 1.35f;
+        public float CoreCarryForward = 0.65f;
+        public float CoreDropSpeed = 3.2f;
+        public float CoreResetY = -3.5f;
 
         public float KnockoutY = -4.5f;
         public float RespawnDelay = 1.35f;
+        public float SpawnProtectionSeconds = 0.85f;
+
+        public float ArenaSafeRadius = 7.15f;
+        public float BotEdgeAvoidRadius = 6.65f;
 
         public static GameTuning CreateDefault() => new GameTuning();
     }
