@@ -31,8 +31,13 @@ namespace MagnetHavoc
             float width = Screen.width / scale;
             float height = Screen.height / scale;
 
-            string overload = match.IsOverload ? "  OVERLOAD x2" : string.Empty;
-            GUI.Label(new Rect(width * 0.5f - 220f, 12f, 440f, 40f), $"{Mathf.CeilToInt(match.RemainingSeconds)}s{overload}", _title);
+            string timerText;
+            if (match.IsSuddenDeath)
+                timerText = "SUDDEN DEATH";
+            else
+                timerText = $"{Mathf.CeilToInt(match.RemainingSeconds)}s" + (match.IsOverload ? "  OVERLOAD x2" : string.Empty);
+
+            GUI.Label(new Rect(width * 0.5f - 220f, 12f, 440f, 40f), timerText, _title);
             GUI.Label(new Rect(18f, 16f, 300f, 30f), $"YOU  {match.GetScore(_local.PlayerId):0}", _label);
             GUI.Label(new Rect(18f, 48f, 300f, 30f), $"FLUX  {_local.Flux.Current:0}/{_local.Flux.Max:0}", _label);
 
