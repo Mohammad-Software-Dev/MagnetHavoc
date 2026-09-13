@@ -36,5 +36,35 @@ namespace MagnetHavoc.Tests
             Assert.AreEqual(0f, scores.GetScore(0), 0.001f);
             Assert.AreEqual(0f, scores.GetScore(1), 0.001f);
         }
+
+        [Test]
+        public void MatchClockEntersOverloadAndExpires()
+        {
+            MatchClockModel clock = new MatchClockModel(120f, 30f);
+            clock.Advance(89f);
+            Assert.IsFalse(clock.IsOverload);
+            Assert.IsFalse(clock.IsExpired);
+
+            clock.Advance(1f);
+            Assert.IsTrue(clock.IsOverload);
+            Assert.AreEqual(30f, clock.RemainingSeconds, 0.001f);
+
+            clock.Advance(100f);
+            Assert.IsTrue(clock.IsExpired);
+            Assert.IsFalse(clock.IsOverload);
+            Assert.AreEqual(0f, clock.RemainingSeconds, 0.001f);
+        }
+
+        [Test]
+        public void DefaultTuningKeepsSafetyRadiiOrdered()
+        {
+            GameTuning tuning = GameTuning.CreateDefault();
+            Assert.Greater(tuning.ArenaSafeRadius, tuning.BotEdgeAvoidRadius);
+            Assert.Greater(tuning.SpawnProtectionSeconds, 0f);
+            Assert.Greater(tuning.MoveDeceleration, tuning.MoveAcceleration);
+            Assert.Greater(tuning.CoreResetY, tuning.KnockoutY);
+            Assert.Greater(tuning.DashKnockbackMultiplier, 0f);
+            Assert.LessOrEqual(tuning.DashKnockbackMultiplier, 1f);
+        }
     }
 }
