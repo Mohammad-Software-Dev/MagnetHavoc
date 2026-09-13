@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using MagnetHavoc.Simulation;
 using UnityEngine;
@@ -23,6 +24,10 @@ namespace MagnetHavoc
         public int WinnerId { get; private set; } = -1;
         public bool IsSuddenDeath => State == MatchState.Playing && _suddenDeath;
         public bool IsOverload => State == MatchState.Playing && (_suddenDeath || (_clock != null && _clock.IsOverload));
+        public bool EndedInSuddenDeath { get; private set; }
+
+        public event Action<int> MatchFinished;
+        public event Action MatchRestarted;
 
         private void Awake() => Instance = this;
 
@@ -167,10 +172,12 @@ namespace MagnetHavoc
 
         private void Finish(int winnerId)
         {
+            EndedInSuddenDeath = _suddenDeath;
             State = MatchState.Ended;
             WinnerId = winnerId;
             _suddenDeath = false;
             GameAudio.Instance?.PlayWin(Vector3.zero);
+            MatchFinished?.Invoke(winnerId);
         }
 
         public void RestartMatch()
@@ -180,6 +187,7 @@ namespace MagnetHavoc
             _stats.Reset();
             _clock = new MatchClockModel(RuntimeContext.Tuning.MatchDurationSeconds, RuntimeContext.Tuning.OverloadStartSeconds);
             _suddenDeath = false;
+            EndedInSuddenDeath = false;
             WinnerId = -1;
             State = MatchState.Playing;
 
@@ -191,6 +199,7 @@ namespace MagnetHavoc
                 }
             }
             _core?.ResetToSpawn();
+            MatchRestarted?.Invoke();
         }
     }
 }
