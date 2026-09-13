@@ -15,8 +15,10 @@ static class HeadlessMatchSim
 
         int[] wins = new int[PlayerCount];
         int suddenDeaths = 0;
+        int scoreTargetFinishes = 0;
         double totalDuration = 0d;
         double totalKnockouts = 0d;
+        double totalWinnerScore = 0d;
         List<float> durations = new List<float>(MatchCount);
 
         for (int seed = 0; seed < MatchCount; seed++)
@@ -24,8 +26,10 @@ static class HeadlessMatchSim
             MatchResult result = RunMatch(tuning, seed);
             wins[result.WinnerId]++;
             if (result.SuddenDeath) suddenDeaths++;
+            if (result.ReachedScoreTarget) scoreTargetFinishes++;
             totalDuration += result.Duration;
             totalKnockouts += result.TotalKnockouts;
+            totalWinnerScore += result.WinnerScore;
             durations.Add(result.Duration);
         }
 
@@ -33,11 +37,14 @@ static class HeadlessMatchSim
         float p95 = durations[(int)Math.Floor((durations.Count - 1) * 0.95)];
         double averageDuration = totalDuration / MatchCount;
         double averageKnockouts = totalKnockouts / MatchCount;
+        double averageWinnerScore = totalWinnerScore / MatchCount;
         double suddenDeathRate = 100d * suddenDeaths / MatchCount;
+        double scoreTargetRate = 100d * scoreTargetFinishes / MatchCount;
 
         Console.WriteLine($"Headless Core Rush stress run: {MatchCount:N0} matches");
         Console.WriteLine($"Tuning: {tuning.TuningVersion}");
         Console.WriteLine($"Average duration: {averageDuration:0.0}s | P95: {p95:0.0}s | Sudden Death: {suddenDeathRate:0.0}%");
+        Console.WriteLine($"Score-target finishes: {scoreTargetFinishes:N0} ({scoreTargetRate:0.00}%) | Average winner score: {averageWinnerScore:0.0}");
         Console.WriteLine($"Average credited KOs/match: {averageKnockouts:0.00}");
 
         for (int i = 0; i < PlayerCount; i++)
@@ -70,6 +77,7 @@ static class HeadlessMatchSim
 
         int holder = -1;
         bool suddenDeath = false;
+        bool reachedScoreTarget = false;
         float elapsed = 0f;
         int winner = -1;
 
@@ -101,6 +109,7 @@ static class HeadlessMatchSim
                 if (score >= tuning.ScoreTarget)
                 {
                     winner = holder;
+                    reachedScoreTarget = true;
                     break;
                 }
 
@@ -162,7 +171,7 @@ static class HeadlessMatchSim
         if (possession > elapsed + Step * 1.5f)
             throw new InvalidOperationException($"Seed {seed} recorded more possession time than match time.");
 
-        return new MatchResult(winner, elapsed, suddenDeath, totalKnockouts);
+        return new MatchResult(winner, elapsed, suddenDeath, totalKnockouts, reachedScoreTarget, scores.GetScore(winner));
     }
 
     private static int RandomOtherPlayer(Random random, int excluded)
@@ -176,5 +185,11 @@ static class HeadlessMatchSim
         return random.NextDouble() < Math.Clamp(probability, 0f, 1f);
     }
 
-    private readonly record struct MatchResult(int WinnerId, float Duration, bool SuddenDeath, int TotalKnockouts);
+    private readonly record struct MatchResult(
+        int WinnerId,
+        float Duration,
+        bool SuddenDeath,
+        int TotalKnockouts,
+        bool ReachedScoreTarget,
+        float WinnerScore);
 }
