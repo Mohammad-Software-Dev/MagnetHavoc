@@ -8,11 +8,18 @@ ROOT = Path(__file__).resolve().parents[1]
 required = [
     ROOT / "README.md",
     ROOT / "docs" / "20_AI_BUILD_BRIEF.md",
+    ROOT / "docs" / "29_UNITY_PLAYTEST_CHECKLIST.md",
+    ROOT / "docs" / "30_PLAYTEST_TELEMETRY.md",
     ROOT / "Game" / "ProjectSettings" / "ProjectVersion.txt",
     ROOT / "Game" / "Packages" / "manifest.json",
+    ROOT / "Game" / "Assets" / "_MagnetHavoc" / "Resources" / "game_tuning.json",
     ROOT / "Game" / "Assets" / "_MagnetHavoc" / "Scripts" / "Bootstrap" / "PrototypeBootstrap.cs",
+    ROOT / "Game" / "Assets" / "_MagnetHavoc" / "Scripts" / "Core" / "TuningProvider.cs",
+    ROOT / "Game" / "Assets" / "_MagnetHavoc" / "Scripts" / "Core" / "TuningRules.cs",
+    ROOT / "Game" / "Assets" / "_MagnetHavoc" / "Scripts" / "Diagnostics" / "PrototypeTelemetry.cs",
     ROOT / "Game" / "Assets" / "_MagnetHavoc" / "Scripts" / "Gameplay" / "MagnetAbility.cs",
     ROOT / "Game" / "Assets" / "_MagnetHavoc" / "Scripts" / "Gameplay" / "MatchManager.cs",
+    ROOT / "Game" / "Assets" / "_MagnetHavoc" / "Scripts" / "Simulation" / "MatchStatsModel.cs",
 ]
 
 errors = []
