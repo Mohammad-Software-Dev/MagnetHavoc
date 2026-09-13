@@ -36,6 +36,7 @@ This document records what is currently decided versus intentionally unresolved.
 - Critical physics objects capped and networked; decorative debris local-only.
 - Simulation, gameplay, input, and presentation remain separated.
 - Core match timing/Overload, Flux, and scoring rules have Unity-independent models for automated testing.
+- Prototype tuning revisions are tagged with `TuningVersion` and match summaries retain that version for comparison.
 
 ### Prototype safety/recovery choices
 These are implemented as tunable hypotheses, not final balance:
@@ -61,10 +62,25 @@ These are implemented as tunable hypotheses, not final balance:
 
 ### Core Rush
 - Exact score rate and target.
+- Does Core Rush need an explicit score target at all, or should the timer be the primary match end condition?
 - How much movement penalty should Core possession apply?
 - What force threshold breaks possession?
 - Best Overload trigger.
 - Is automatic proximity pickup sufficiently readable and fair?
+
+### Headless scoring signal — not a final balance decision
+A deterministic CI stress harness ran 5,000 symmetric four-player Core Rush matches using tuning `prototype-2026-09-13-a`.
+
+Results:
+- Player-ID win shares: 23.96%–26.02%.
+- No match termination failures.
+- Average duration: 120.0 seconds; P95: 120.0 seconds.
+- Sudden Death: 0.2%.
+- Score-target finishes: **0/5,000** at the current 100-point target.
+- Average winner score: 42.7.
+- Average credited knockouts: 9.76 per match under the simulator's abstract pressure model.
+
+This harness deliberately abstracts away real Unity physics, positioning, map geometry, touch control quality, bot tactics, and human skill. It is evidence that **100 points is still an unvalidated hypothesis**, not evidence that the correct target is 43. During real Unity/human playtesting, record winner scores and whether early target finishes improve the experience. Valid outcomes include lowering the target, increasing score rate, timer-only scoring, or retaining 100 as a rare blowout/mercy condition.
 
 ### Physics
 - Best player magnetic force multiplier.
